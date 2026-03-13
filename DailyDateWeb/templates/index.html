@@ -12,10 +12,9 @@
             --primary-color: #165dff;
             --header-width: 160px;
             --cell-width: 260px;
-            --cell-height: 160px; /* 强制统一行高，保持矩阵整齐 */
+            --cell-height: 160px;
         }
 
-        /* 采用 Flex 纵向布局，防止底部归档栏遮挡滚动条 */
         body {
             font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
             margin: 0;
@@ -28,13 +27,38 @@
             overflow: hidden;
         }
 
-        /* 自定义滚动条，使其更宽更容易拖拽 */
         ::-webkit-scrollbar { width: 10px; height: 12px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #c0c4cc; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #909399; }
 
-        /* 表格容器占据剩余所有空间 */
+        /* ======== 新增顶部工具栏样式 ======== */
+        .top-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            font-size: 14px;
+        }
+        .top-toolbar input[type="date"] {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 4px 8px;
+            outline: none;
+            color: #333;
+            font-family: inherit;
+        }
+        .btn-primary { background: var(--primary-color); color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 13px;}
+        .btn-primary:hover { background: #0042d9; }
+        .btn-outline { background: white; color: #4e5969; border: 1px solid #c9cdd4; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 13px;}
+        .btn-outline:hover { border-color: var(--primary-color); color: var(--primary-color); }
+        /* ==================================== */
+
         .table-container {
             width: 100%;
             flex: 1;
@@ -46,82 +70,24 @@
             position: relative;
         }
 
-        /* 规定行高 */
-        .table-row {
-            display: flex;
-            border-bottom: 1px solid var(--border-color);
-            width: max-content;
-            height: var(--cell-height);
-        }
+        .table-row { display: flex; border-bottom: 1px solid var(--border-color); width: max-content; height: var(--cell-height);}
+        .cell { flex: 0 0 var(--cell-width); border-right: 1px solid var(--border-color); background: #fff; box-sizing: border-box; position: relative; }
 
-        /* 为绝对定位的编辑器提供参照 */
-        .cell {
-            flex: 0 0 var(--cell-width);
-            border-right: 1px solid var(--border-color);
-            background: #fff;
-            box-sizing: border-box;
-            position: relative;
-        }
-
-        /* 优化后的滚动内容框，填满单元格 */
-        .scroll-box {
-            width: 100%;
-            height: 100%;
-            padding: 10px;
-            box-sizing: border-box;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            word-break: break-all;
-            font-size: 13px;
-            line-height: 1.6;
-            color: #333;
-            cursor: text;
-        }
+        .scroll-box { width: 100%; height: 100%; padding: 10px; box-sizing: border-box; overflow-y: auto; white-space: pre-wrap; word-break: break-all; font-size: 13px; line-height: 1.6; color: #333; cursor: text; }
         .scroll-box:hover { background-color: #fafafa; }
 
-        /* 悬浮在单元格上方的无缝编辑器 */
-        .editor {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 2px solid var(--primary-color);
-            padding: 8px;
-            font-family: inherit;
-            font-size: 13px;
-            line-height: 1.6;
-            resize: none;
-            outline: none;
-            box-sizing: border-box;
-            background: #fff;
-            z-index: 5;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
+        .editor { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 2px solid var(--primary-color); padding: 8px; font-family: inherit; font-size: 13px; line-height: 1.6; resize: none; outline: none; box-sizing: border-box; background: #fff; z-index: 5; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
-        /* 左侧固定列 */
-        .col-fixed {
-            flex: 0 0 var(--header-width); position: sticky; left: 0; z-index: 10; background: #fdfdfd;
-            border-right: 2px solid #e5e6eb; display: flex; justify-content: center; align-items: center;
-            font-weight: bold; color: #4e5969; user-select: none; padding: 0; height: 100%;
-        }
+        .col-fixed { flex: 0 0 var(--header-width); position: sticky; left: 0; z-index: 10; background: #fdfdfd; border-right: 2px solid #e5e6eb; display: flex; justify-content: center; align-items: center; font-weight: bold; color: #4e5969; user-select: none; padding: 0; height: 100%; }
 
-        /* 顶部表头 */
         .header-row { height: 50px; position: sticky; top: 0; z-index: 20; background: #fff; }
         .header-row .cell { background: #f2f3f5; align-items: center; justify-content: center; display: flex; }
         .header-row .col-fixed { z-index: 30; background: var(--primary-color); color: white; border-bottom: 1px solid var(--primary-color); }
 
-        /* 分割线标题 */
         .divider-row { background: #f0f2f5; height: 32px; display: flex; width: max-content; }
-        .divider-fixed {
-            flex: 0 0 var(--header-width); position: sticky; left: 0; z-index: 15;
-            background: #eef1f6; color: #86909c; font-size: 12px; font-weight: bold;
-            display: flex; align-items: center; justify-content: space-between; padding: 0 10px; box-sizing: border-box;
-            border-right: 2px solid #e5e6eb; border-bottom: 1px solid #dcdfe6;
-        }
+        .divider-fixed { flex: 0 0 var(--header-width); position: sticky; left: 0; z-index: 15; background: #eef1f6; color: #86909c; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; box-sizing: border-box; border-right: 2px solid #e5e6eb; border-bottom: 1px solid #dcdfe6; }
         .divider-bg { flex: 1; background: #f7f8fa; border-bottom: 1px solid #dcdfe6; }
 
-        /* 图标按钮 */
         .btn-hide { position: absolute; top: 2px; left: 2px; font-size: 10px; color: #c9cdd4; cursor: pointer; padding: 2px 5px; line-height: 1; }
         .btn-hide:hover { color: #f53f3f; font-weight: bold; }
         .drag-handle { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); color: #c9cdd4; cursor: grab; font-size: 16px; padding: 5px; }
@@ -129,26 +95,11 @@
         .btn-add-item { cursor: pointer; color: #165dff; font-weight: bold; font-size: 14px;}
         .btn-add-item:hover { color: #0042d9; }
 
-        /* 关键词高亮 */
         .kw-up { color: #f53f3f; background: #fff2f1; padding: 1px 3px; border-radius: 2px; font-weight: bold; }
         .kw-down { color: #00b42a; background: #e8ffea; padding: 1px 3px; border-radius: 2px; font-weight: bold; }
         .stock { font-weight: 700; color: #000; }
 
-        /* 归档仓库栏：改为正常的文档流，不再遮挡上方容器 */
-        .archive-bar {
-            background: white;
-            border: 1px solid var(--border-color);
-            border-top: none;
-            border-radius: 0 0 8px 8px;
-            padding: 10px 20px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            font-size: 12px;
-            margin-bottom: 10px; /* 底部留一点空隙 */
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.02);
-            flex-wrap: wrap;
-        }
+        .archive-bar { background: white; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; padding: 10px 20px; display: flex; gap: 10px; align-items: center; font-size: 12px; margin-bottom: 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.02); flex-wrap: wrap; }
         .tag { background: #f2f3f5; padding: 4px 10px; border-radius: 4px; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; }
         .tag.mood-tag { color: #722ed1; background: #f9f0ff; border-color: #d3adf7;}
         .tag:hover { border-color: var(--primary-color); color: var(--primary-color); transform: translateY(-1px); }
@@ -160,6 +111,14 @@
 </head>
 <body>
 
+    <div class="top-toolbar">
+        <strong style="color: #4e5969;">📅 日期查询：</strong>
+        <input type="date" id="search-start" value="{{ current_start }}">
+        <span style="color: #86909c;">至</span>
+        <input type="date" id="search-end" value="{{ current_end }}">
+        <button class="btn-primary" onclick="searchDates()">查询</button>
+        <button class="btn-outline" onclick="window.location.href='/'">默认 (最近15天)</button>
+    </div>
     <div class="table-container">
         <div class="table-row header-row">
             <div class="cell col-fixed">
@@ -243,7 +202,22 @@
     </div>
 
 <script>
-    // 配置两个独立的拖拽区域
+    // ======== 新增：日期查询逻辑 ========
+    function searchDates() {
+        const start = document.getElementById('search-start').value;
+        const end = document.getElementById('search-end').value;
+        if (!start || !end) {
+            alert('请选择完整的开始和结束日期');
+            return;
+        }
+        if (start > end) {
+            alert('开始日期不能晚于结束日期');
+            return;
+        }
+        window.location.href = `/?start=${start}&end=${end}`;
+    }
+    // ====================================
+
     function initSortable(id, type) {
         const el = document.getElementById(id);
         Sortable.create(el, {
@@ -261,7 +235,6 @@
     initSortable('mood-list', 'mood');
     initSortable('sector-list', 'sector');
 
-    // 渲染文本
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.editable').forEach(el => {
             const raw = el.getAttribute('data-raw') || '';
@@ -269,54 +242,38 @@
         });
     });
 
-    // 更安全的文本格式化，防止正则破坏 HTML DOM
     function formatText(text) {
         if (!text) return '';
-
-        // 1. 先转义 HTML 字符，防止用户输入 < > 导致页面崩溃
         let safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
         return safeText.split('\n').map(line => {
             if(!line.trim()) return '<br>';
-
-            // 2. 优化后的高亮逻辑
             let p = line
                 .replace(/([^\s]+)?(\s+)?(\d+板|涨停|连板|反包|晋级|新高|大涨|一字|爆发|修复|主升|回封)/g,
                     '<span class="stock">$1</span>$2<span class="kw-up">$3</span>')
                 .replace(/(跌停|断板|A杀|大跌|核按钮|闷杀|退潮|分歧|跳水|炸板)/g,
                     '<span class="kw-down">$1</span>');
-
-            // 清理无匹配时产生的 'undefined'
             p = p.replace(/<span class="stock">undefined<\/span>/g, '');
-
             return `<div>${p}</div>`;
         }).join('');
     }
 
-    // 无缝编辑逻辑
     function edit(box) {
         if(box.parentNode.querySelector('.editor')) return;
-
         const text = box.getAttribute('data-raw') || '';
         const cell = box.parentNode;
 
-        // 创建绝对定位的 Textarea
         const input = document.createElement('textarea');
         input.className = 'editor';
         input.value = text;
-
         cell.appendChild(input);
         input.focus();
 
-        // 暂时隐藏原有的展示文本，防止重叠
         box.style.visibility = 'hidden';
 
         input.onblur = () => {
             const val = input.value;
             box.setAttribute('data-raw', val);
             box.innerHTML = formatText(val);
-
-            // 恢复展示层，销毁输入框
             box.style.visibility = 'visible';
             input.remove();
 

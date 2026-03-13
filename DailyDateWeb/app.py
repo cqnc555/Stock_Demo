@@ -66,16 +66,26 @@ def init_db():
 
 @app.route('/')
 def index():
+    # 获取前端传来的查询参数
+    start_date = request.args.get('start')
+    end_date = request.args.get('end')
+
     db = get_db()
     data_map = {}
 
     with db.cursor() as cursor:
-        # 获取日期
-        cursor.execute('SELECT date FROM daily_meta ORDER BY date DESC')
-        dates = [row['date'] for row in cursor.fetchall()]
+        # 1. 获取日期：根据是否有传参决定查询范围
+        if start_date and end_date:
+            # 自定义区间查询
+            cursor.execute('SELECT date FROM daily_meta WHERE date >= %s AND date <= %s ORDER BY date DESC',
+                           (start_date, end_date))
+            dates = [row['date'] for row in cursor.fetchall()]
+        else:
+            # 默认查询最近15天
+            cursor.execute('SELECT date FROM daily_meta ORDER BY date DESC LIMIT 15')
+            dates = [row['date'] for row in cursor.fetchall()]
 
         # --- 获取情绪行 (Moods) ---
-        # MySQL 没有隐式的 rowid，所以第二个排序字段改为 name
         cursor.execute('SELECT name FROM mood_config WHERE is_visible = 1 ORDER BY rank ASC, name ASC')
         moods = [row['name'] for row in cursor.fetchall()]
 
@@ -90,21 +100,27 @@ def index():
         hidden_sectors = [row['name'] for row in cursor.fetchall()]
 
         # --- 获取所有数据内容 ---
-        # 读取情绪数据
-        cursor.execute('SELECT * FROM mood_data')
-        for row in cursor.fetchall():
-            data_map[(row['date'], row['name'])] = row['content']
+        # 优化：只获取当前展示日期范围内的数据，提升查询性能
+        if dates:
+            placeholders = ', '.join(['%s'] * len(dates))
 
-        # 读取板块数据
-        cursor.execute('SELECT * FROM sector_data')
-        for row in cursor.fetchall():
-            data_map[(row['date'], row['name'])] = row['content']
+            # 读取情绪数据
+            cursor.execute(f'SELECT * FROM mood_data WHERE date IN ({placeholders})', dates)
+            for row in cursor.fetchall():
+                data_map[(row['date'], row['name'])] = row['content']
+
+            # 读取板块数据
+            cursor.execute(f'SELECT * FROM sector_data WHERE date IN ({placeholders})', dates)
+            for row in cursor.fetchall():
+                data_map[(row['date'], row['name'])] = row['content']
 
     return render_template('index.html',
                            dates=dates,
                            moods=moods, hidden_moods=hidden_moods,
                            sectors=sectors, hidden_sectors=hidden_sectors,
-                           data_map=data_map)
+                           data_map=data_map,
+                           current_start=start_date or '',
+                           current_end=end_date or '')
 
 
 # --- 通用：添加行 (type=mood 或 sector) ---
